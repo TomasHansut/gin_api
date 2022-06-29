@@ -24,21 +24,23 @@ var (
 )
 
 func init() {
+	// Create empty context
 	ctx = context.TODO()
-
+	// Create mongo connection
 	mongoconn := options.Client().ApplyURI("mongodb://localhost:27017")
+	// Mongo client connected to DB and check for erros
 	mongoclient, err = mongo.Connect(ctx, mongoconn)
 	if err != nil {
 		log.Fatalln(err)
 	}
-
+	// Ping DB to test connection and check for errors
 	err = mongoclient.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	fmt.Println("mongo connection was established")
-
+	// Get user db
 	usercollection = mongoclient.Database("userdb").Collection("users")
 	userservice = services.NewUserService(usercollection, ctx)
 	usercontroller = controllers.New(userservice)
@@ -46,6 +48,7 @@ func init() {
 }
 
 func main() {
+	// Desconnect from DB when program shutdown
 	defer mongoclient.Disconnect(ctx)
 
 	basepath := server.Group("/v1")
